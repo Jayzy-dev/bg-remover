@@ -1,27 +1,19 @@
 import streamlit as st
-from rembg import remove
-from PIL import Image
-import io
+from removebg import RemoveBg
+import os
 
-st.set_page_config(page_title="Background Remover", layout="centered")
+st.title("أداة إزالة الخلفية الاحترافية")
 
-st.title("✂️ مزيل الخلفية الذكي")
-st.write("ارفع صورتك وسأقوم بإزالة الخلفية فوراً!")
+# الحصول على الـ API Key من إعدادات Streamlit الآمنة
+api_key = st.secrets["REMOVE_BG_API_KEY"]
 
-uploaded_file = st.file_uploader("اختر صورة...", type=["jpg", "png", "jpeg"])
+uploaded_file = st.file_uploader("اختر صورة...", type=["jpg", "png"])
 
 if uploaded_file is not None:
-    image = Image.open(uploaded_file)
-    st.image(image, caption="الصورة الأصلية", use_container_width=True)
+    with open(uploaded_file.name, "wb") as f:
+        f.write(uploaded_file.getbuffer())
     
-    with st.spinner('جاري معالجة الصورة... قد يستغرق هذا بضع ثوانٍ'):
-        # إزالة الخلفية
-        output = remove(image)
-        st.image(output, caption="النتيجة بدون خلفية", use_container_width=True)
-        
-        # زر التحميل
-        buf = io.BytesIO()
-        output.save(buf, format="PNG")
-        st.download_button("📥 تحميل الصورة", buf.getvalue(), "no_bg.png", "image/png")
-else:
-    st.info("بانتظار رفع الصورة للبدء...")
+    rmbg = RemoveBg(api_key, "error_log.txt")
+    rmbg.remove_background_from_img_file(uploaded_file.name)
+    
+    st.image(f"{uploaded_file.name}_no_bg.png", caption='النتيجة')
