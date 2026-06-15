@@ -3,29 +3,25 @@ from rembg import remove
 from PIL import Image
 import io
 
-st.title("أداة إزالة الخلفية المجانية")
+st.set_page_config(page_title="Background Remover", layout="centered")
 
-uploaded_file = st.file_uploader("ارفع صورتك هنا...", type=["jpg", "png", "jpeg"])
+st.title("✂️ مزيل الخلفية الذكي")
+st.write("ارفع صورتك وسأقوم بإزالة الخلفية فوراً!")
 
-if uploaded_file:
-    # قراءة الصورة
-    input_image = Image.open(uploaded_file)
+uploaded_file = st.file_uploader("اختر صورة...", type=["jpg", "png", "jpeg"])
 
-    # المعالجة (مجانية تماماً!)
-    with st.spinner('جاري إزالة الخلفية...'):
-        output_image = remove(input_image)
-
-    # عرض النتيجة
-    st.image(output_image, caption='تمت إزالة الخلفية بنجاح')
-
-    # زر التحميل
-    buf = io.BytesIO()
-    output_image.save(buf, format="PNG")
-    byte_im = buf.getvalue()
-
-    st.download_button(
-        label="تحميل الصورة",
-        data=byte_im,
-        file_name="no_bg.png",
-        mime="image/png"
-    )
+if uploaded_file is not None:
+    image = Image.open(uploaded_file)
+    st.image(image, caption="الصورة الأصلية", use_container_width=True)
+    
+    with st.spinner('جاري معالجة الصورة... قد يستغرق هذا بضع ثوانٍ'):
+        # إزالة الخلفية
+        output = remove(image)
+        st.image(output, caption="النتيجة بدون خلفية", use_container_width=True)
+        
+        # زر التحميل
+        buf = io.BytesIO()
+        output.save(buf, format="PNG")
+        st.download_button("📥 تحميل الصورة", buf.getvalue(), "no_bg.png", "image/png")
+else:
+    st.info("بانتظار رفع الصورة للبدء...")
